@@ -1,6 +1,7 @@
 import Footer from '../../components/Footer';
 import Header from '../../components/header/Header';
 import SealBar from '../../components/SealBar';
+import TypeWriter from '../../components/TypeWriter';
 import './MainPage.css';
 
 const MainPage = () => {
@@ -36,11 +37,11 @@ const MainPage = () => {
             <Header />
             <div className="main-content">
                 <div className="hero-section">
-                    <h1 className="slogan">
-                        <span>Simple.</span>
-                        <span>Secure.</span>
-                        <span>Fast.</span>
-                    </h1>
+                    <TypeWriter
+                        words={['Simple.', 'Secure.', 'Fast.']}
+                        speed={120}
+                        delayBetweenWords={400}
+                    />
                     <p className="hero-description">
                         Create an undeniable timeline of truth. Seal your digital assets on the chain and verify their existence forever, backed by the mathematical certainty of cryptography.
                     </p>

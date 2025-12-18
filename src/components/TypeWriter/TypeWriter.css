@@ -1,0 +1,41 @@
+.typewriter-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    flex-wrap: wrap;
+}
+
+.typewriter-word {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: clamp(40px, 8vw, 72px);
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+    min-height: 1.2em;
+}
+
+.typewriter-cursor {
+    display: inline-block;
+    color: var(--text-primary);
+    animation: blink 0.8s infinite;
+    margin-left: 2px;
+    font-weight: 300;
+}
+
+@keyframes blink {
+
+    0%,
+    50% {
+        opacity: 1;
+    }
+
+    51%,
+    100% {
+        opacity: 0;
+    }
+}
