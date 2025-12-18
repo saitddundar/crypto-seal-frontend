@@ -1,0 +1,88 @@
+.main-page {
+    width: 100%;
+    min-height: 100vh;
+    background: var(--bg-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.main-content {
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 60px;
+}
+
+.hero-section {
+    text-align: center;
+}
+
+.slogan {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    flex-wrap: wrap;
+}
+
+.slogan span {
+    font-size: clamp(40px, 8vw, 72px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+    animation: fadeInUp 0.6s ease-out backwards;
+}
+
+.slogan span:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.slogan span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.slogan span:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.seal-section {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    animation: fadeInUp 0.6s ease-out 0.5s backwards;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .main-page {
+        padding: 30px 16px;
+    }
+
+    .main-content {
+        gap: 50px;
+    }
+
+    .slogan span {
+        font-size: clamp(36px, 12vw, 60px);
+    }
+}
