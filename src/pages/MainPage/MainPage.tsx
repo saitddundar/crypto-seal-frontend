@@ -1,3 +1,4 @@
+import Footer from '../../components/Footer';
 import Header from '../../components/header/Header';
 import SealBar from '../../components/SealBar';
 import './MainPage.css';
@@ -40,12 +41,16 @@ const MainPage = () => {
                         <span>Secure.</span>
                         <span>Fast.</span>
                     </h1>
+                    <p className="hero-description">
+                        Create an undeniable timeline of truth. Seal your digital assets on the chain and verify their existence forever, backed by the mathematical certainty of cryptography.
+                    </p>
                 </div>
 
                 <div className="seal-section">
                     <SealBar onSeal={handleSeal} onResolve={handleResolve} />
                 </div>
             </div>
+            <Footer />
         </div>
     );
 };
