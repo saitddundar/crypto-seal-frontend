@@ -42,14 +42,14 @@ const MainPage = () => {
                         speed={120}
                         delayBetweenWords={400}
                     />
-                    <p className="hero-description">
-                        Create an undeniable timeline of truth. Seal your digital assets on the chain and verify their existence forever, backed by the mathematical certainty of cryptography.
-                    </p>
+
                 </div>
 
                 <div className="seal-section">
                     <SealBar onSeal={handleSeal} onResolve={handleResolve} />
                 </div>
+                <p className="hero-description">
+                    Crypto Seal is an open-source cryptographic sealing tool that lets you encrypt, timestamp, and prove the authenticity of digital assets without trust, intermediaries, or complexity.                    </p>
             </div>
             <Footer />
         </div>
