@@ -127,17 +127,32 @@
     }
 }
 
-/* Hash sonucu stilleri */
-.seal-bar-input-wrapper.hashed {
+/* Seal sonucu stilleri (yeşil) */
+.seal-bar-input-wrapper.sealed {
     border-color: rgba(34, 197, 94, 0.4);
     background: linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, rgba(16, 185, 129, 0.08) 100%);
 }
 
-.seal-bar-input.hash-result {
+.seal-bar-input.seal-result {
     font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
     font-size: 13px;
     letter-spacing: 0.5px;
     color: rgba(34, 197, 94, 0.95);
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+/* Resolve sonucu stilleri (mavi) */
+.seal-bar-input-wrapper.resolved {
+    border-color: rgba(59, 130, 246, 0.4);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(99, 102, 241, 0.08) 100%);
+}
+
+.seal-bar-input.resolve-result {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: rgba(59, 130, 246, 0.95);
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
@@ -166,6 +181,7 @@
     border-color: rgba(255, 255, 255, 0.3);
 }
 
+/* Seal kopyalama başarı (yeşil) */
 .seal-bar-copy.success {
     color: rgb(34, 197, 94);
     border-color: rgba(34, 197, 94, 0.4);
@@ -174,6 +190,27 @@
 
 .seal-bar-copy.success:hover {
     background: rgba(34, 197, 94, 0.15);
+}
+
+/* Resolve kopyalama stilleri (mavi) */
+.seal-bar-copy.resolve-copy {
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.seal-bar-copy.resolve-copy:hover {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.4);
+    color: rgb(59, 130, 246);
+}
+
+.seal-bar-copy.resolve-copy.success {
+    color: rgb(59, 130, 246);
+    border-color: rgba(59, 130, 246, 0.4);
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.seal-bar-copy.resolve-copy.success:hover {
+    background: rgba(59, 130, 246, 0.15);
 }
 
 /* Success animasyonu */

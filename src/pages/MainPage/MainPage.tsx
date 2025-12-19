@@ -5,8 +5,8 @@ import TypeWriter from '../../components/TypeWriter';
 import './MainPage.css';
 
 const MainPage = () => {
-    // Backend API calls - şimdilik SealBar'ın kendi mock servisini kullanıyoruz
-    // Backend hazır olunca bu fonksiyonu aktifleştir:
+    // Backend API calls - şimdilik SealBar'ın kendi mock servislerini kullanıyoruz
+    // Backend hazır olunca bu fonksiyonları aktifleştir:
     // const handleSeal = async (text: string): Promise<string> => {
     //     const response = await fetch('/api/seal', {
     //         method: 'POST',
@@ -17,12 +17,11 @@ const MainPage = () => {
     //     return data.hash;
     // };
 
-    const handleResolve = async (hash: string) => {
-        console.log('Resolving hash:', hash);
-        // TODO: Backend call
-        // const response = await fetch(`/api/resolve/${hash}`);
-        // return await response.json();
-    };
+    // const handleResolve = async (hash: string): Promise<string> => {
+    //     const response = await fetch(`/api/resolve/${hash}`);
+    //     const data = await response.json();
+    //     return data.text;
+    // };
 
     return (
         <div className="main-page">
@@ -38,7 +37,7 @@ const MainPage = () => {
                 </div>
 
                 <div className="seal-section">
-                    <SealBar onResolve={handleResolve} />
+                    <SealBar />
                 </div>
                 <p className="hero-description">
                     Crypto Seal is an open-source cryptographic sealing tool that lets you encrypt, timestamp, and prove the authenticity of digital assets without trust, intermediaries, or complexity.                    </p>

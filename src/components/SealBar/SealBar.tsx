@@ -2,18 +2,17 @@ import { useState } from 'react';
 import './SealBar.css';
 
 type TabType = 'seal' | 'resolve';
+type ResultType = 'sealed' | 'resolved' | null;
 
 interface SealBarProps {
     onSeal?: (text: string) => Promise<string>; // Backend'den hash döner
-    onResolve?: (hash: string) => Promise<void>;
+    onResolve?: (hash: string) => Promise<string>; // Backend'den çözülmüş metin döner
 }
 
 // Mock hash servisi - backend hazır olunca gerçek API ile değiştirilecek
 const mockHashService = async (text: string): Promise<string> => {
-    // Simüle edilmiş gecikme
     await new Promise(resolve => setTimeout(resolve, 800));
 
-    // Basit bir mock hash oluştur (gerçek hash backend'den gelecek)
     const encoder = new TextEncoder();
     const data = encoder.encode(text);
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
@@ -22,16 +21,24 @@ const mockHashService = async (text: string): Promise<string> => {
     return hashHex;
 };
 
+// Mock resolve servisi - backend hazır olunca gerçek API ile değiştirilecek
+const mockResolveService = async (hash: string): Promise<string> => {
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    // Mock: Hash'in ilk 8 karakterini göster (gerçek veri backend'den gelecek)
+    return `Resolved content for: ${hash.substring(0, 16)}...`;
+};
+
 const SealBar = ({ onSeal, onResolve }: SealBarProps) => {
     const [activeTab, setActiveTab] = useState<TabType>('seal');
     const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [hashedValue, setHashedValue] = useState<string | null>(null);
-    const [isHashed, setIsHashed] = useState(false);
+    const [resultValue, setResultValue] = useState<string | null>(null);
+    const [resultType, setResultType] = useState<ResultType>(null);
     const [copySuccess, setCopySuccess] = useState(false);
 
     const handleSubmit = async () => {
-        if (!inputValue.trim() || isLoading || isHashed) return;
+        if (!inputValue.trim() || isLoading || resultType) return;
 
         setIsLoading(true);
         try {
@@ -41,17 +48,24 @@ const SealBar = ({ onSeal, onResolve }: SealBarProps) => {
                 if (onSeal) {
                     hash = await onSeal(inputValue);
                 } else {
-                    // Mock servis kullan (backend yoksa)
                     hash = await mockHashService(inputValue);
                 }
 
-                // Hash'i göster
-                setHashedValue(hash);
+                setResultValue(hash);
                 setInputValue(hash);
-                setIsHashed(true);
-            } else if (activeTab === 'resolve' && onResolve) {
-                await onResolve(inputValue);
-                setInputValue('');
+                setResultType('sealed');
+            } else if (activeTab === 'resolve') {
+                // Backend'e gönder ve çözülmüş metni al
+                let resolvedText: string;
+                if (onResolve) {
+                    resolvedText = await onResolve(inputValue);
+                } else {
+                    resolvedText = await mockResolveService(inputValue);
+                }
+
+                setResultValue(resolvedText);
+                setInputValue(resolvedText);
+                setResultType('resolved');
             }
         } catch (error) {
             console.error('Error:', error);
@@ -70,18 +84,18 @@ const SealBar = ({ onSeal, onResolve }: SealBarProps) => {
         const newValue = e.target.value;
         setInputValue(newValue);
 
-        // Kullanıcı yeni bir şey yazınca hash durumunu sıfırla
-        if (isHashed && newValue !== hashedValue) {
-            setIsHashed(false);
-            setHashedValue(null);
+        // Kullanıcı yeni bir şey yazınca sonuç durumunu sıfırla
+        if (resultType && newValue !== resultValue) {
+            setResultType(null);
+            setResultValue(null);
             setCopySuccess(false);
         }
     };
 
     const handleCopy = async () => {
-        if (hashedValue) {
+        if (resultValue) {
             try {
-                await navigator.clipboard.writeText(hashedValue);
+                await navigator.clipboard.writeText(resultValue);
                 setCopySuccess(true);
                 setTimeout(() => setCopySuccess(false), 2000);
             } catch (err) {
@@ -93,9 +107,29 @@ const SealBar = ({ onSeal, onResolve }: SealBarProps) => {
     const handleTabChange = (tab: TabType) => {
         setActiveTab(tab);
         setInputValue('');
-        setHashedValue(null);
-        setIsHashed(false);
+        setResultValue(null);
+        setResultType(null);
         setCopySuccess(false);
+    };
+
+    // CSS class'ları belirle
+    const getWrapperClass = () => {
+        if (resultType === 'sealed') return 'seal-bar-input-wrapper sealed';
+        if (resultType === 'resolved') return 'seal-bar-input-wrapper resolved';
+        return 'seal-bar-input-wrapper';
+    };
+
+    const getInputClass = () => {
+        if (resultType === 'sealed') return 'seal-bar-input seal-result';
+        if (resultType === 'resolved') return 'seal-bar-input resolve-result';
+        return 'seal-bar-input';
+    };
+
+    const getCopyClass = () => {
+        let base = 'seal-bar-copy';
+        if (resultType === 'resolved') base += ' resolve-copy';
+        if (copySuccess) base += ' success';
+        return base;
     };
 
     return (
@@ -123,10 +157,10 @@ const SealBar = ({ onSeal, onResolve }: SealBarProps) => {
                 </button>
             </div>
 
-            <div className={`seal-bar-input-wrapper ${isHashed ? 'hashed' : ''}`}>
+            <div className={getWrapperClass()}>
                 <input
                     type="text"
-                    className={`seal-bar-input ${isHashed ? 'hash-result' : ''}`}
+                    className={getInputClass()}
                     placeholder={
                         activeTab === 'seal'
                             ? 'Enter text to seal...'
@@ -136,15 +170,15 @@ const SealBar = ({ onSeal, onResolve }: SealBarProps) => {
                     onChange={handleInputChange}
                     onKeyDown={handleKeyDown}
                     disabled={isLoading}
-                    readOnly={isHashed}
+                    readOnly={resultType !== null}
                 />
 
-                {/* Kopyalama butonu - sadece hash varken göster */}
-                {isHashed && (
+                {/* Kopyalama butonu - sonuç varken göster */}
+                {resultType && (
                     <button
-                        className={`seal-bar-copy ${copySuccess ? 'success' : ''}`}
+                        className={getCopyClass()}
                         onClick={handleCopy}
-                        title={copySuccess ? 'Copied!' : 'Copy hash'}
+                        title={copySuccess ? 'Copied!' : 'Copy'}
                     >
                         {copySuccess ? (
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -162,7 +196,7 @@ const SealBar = ({ onSeal, onResolve }: SealBarProps) => {
                 <button
                     className="seal-bar-submit"
                     onClick={handleSubmit}
-                    disabled={!inputValue.trim() || isLoading || isHashed}
+                    disabled={!inputValue.trim() || isLoading || resultType !== null}
                 >
                     {isLoading ? (
                         <div className="seal-bar-spinner" />
