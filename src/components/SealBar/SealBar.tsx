@@ -1,74 +1,51 @@
 import { useState } from 'react';
+import { sealDocument, resolveByHash } from '../../services/api';
 import './SealBar.css';
 
 type TabType = 'seal' | 'resolve';
-type ResultType = 'sealed' | 'resolved' | null;
+type ResultType = 'sealed' | 'resolved' | 'error' | null;
 
-interface SealBarProps {
-    onSeal?: (text: string) => Promise<string>; // Backend'den hash döner
-    onResolve?: (hash: string) => Promise<string>; // Backend'den çözülmüş metin döner
-}
-
-// Mock hash servisi - backend hazır olunca gerçek API ile değiştirilecek
-const mockHashService = async (text: string): Promise<string> => {
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    const encoder = new TextEncoder();
-    const data = encoder.encode(text);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    return hashHex;
-};
-
-// Mock resolve servisi - backend hazır olunca gerçek API ile değiştirilecek
-const mockResolveService = async (hash: string): Promise<string> => {
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    // Mock: Hash'in ilk 8 karakterini göster (gerçek veri backend'den gelecek)
-    return `Resolved content for: ${hash.substring(0, 16)}...`;
-};
-
-const SealBar = ({ onSeal, onResolve }: SealBarProps) => {
+const SealBar = () => {
     const [activeTab, setActiveTab] = useState<TabType>('seal');
     const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [resultValue, setResultValue] = useState<string | null>(null);
     const [resultType, setResultType] = useState<ResultType>(null);
     const [copySuccess, setCopySuccess] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const handleSubmit = async () => {
         if (!inputValue.trim() || isLoading || resultType) return;
 
         setIsLoading(true);
+        setErrorMessage(null);
+
         try {
             if (activeTab === 'seal') {
                 // Backend'e gönder ve hash al
-                let hash: string;
-                if (onSeal) {
-                    hash = await onSeal(inputValue);
-                } else {
-                    hash = await mockHashService(inputValue);
-                }
+                const response = await sealDocument(inputValue);
 
-                setResultValue(hash);
-                setInputValue(hash);
+                setResultValue(response.hash);
+                setInputValue(response.hash);
                 setResultType('sealed');
             } else if (activeTab === 'resolve') {
                 // Backend'e gönder ve çözülmüş metni al
-                let resolvedText: string;
-                if (onResolve) {
-                    resolvedText = await onResolve(inputValue);
-                } else {
-                    resolvedText = await mockResolveService(inputValue);
-                }
+                const response = await resolveByHash(inputValue);
 
-                setResultValue(resolvedText);
-                setInputValue(resolvedText);
-                setResultType('resolved');
+                if (response.found && response.record?.text) {
+                    setResultValue(response.record.text);
+                    setInputValue(response.record.text);
+                    setResultType('resolved');
+                } else {
+                    // Hash bulunamadı
+                    setErrorMessage(response.message || 'Hash not found');
+                    setResultType('error');
+                }
             }
         } catch (error) {
             console.error('Error:', error);
+            setErrorMessage('Connection error. Please try again.');
+            setResultType('error');
         } finally {
             setIsLoading(false);
         }
@@ -89,6 +66,7 @@ const SealBar = ({ onSeal, onResolve }: SealBarProps) => {
             setResultType(null);
             setResultValue(null);
             setCopySuccess(false);
+            setErrorMessage(null);
         }
     };
 
@@ -110,18 +88,21 @@ const SealBar = ({ onSeal, onResolve }: SealBarProps) => {
         setResultValue(null);
         setResultType(null);
         setCopySuccess(false);
+        setErrorMessage(null);
     };
 
     // CSS class'ları belirle
     const getWrapperClass = () => {
         if (resultType === 'sealed') return 'seal-bar-input-wrapper sealed';
         if (resultType === 'resolved') return 'seal-bar-input-wrapper resolved';
+        if (resultType === 'error') return 'seal-bar-input-wrapper error';
         return 'seal-bar-input-wrapper';
     };
 
     const getInputClass = () => {
         if (resultType === 'sealed') return 'seal-bar-input seal-result';
         if (resultType === 'resolved') return 'seal-bar-input resolve-result';
+        if (resultType === 'error') return 'seal-bar-input error-result';
         return 'seal-bar-input';
     };
 
@@ -170,11 +151,11 @@ const SealBar = ({ onSeal, onResolve }: SealBarProps) => {
                     onChange={handleInputChange}
                     onKeyDown={handleKeyDown}
                     disabled={isLoading}
-                    readOnly={resultType !== null}
+                    readOnly={resultType === 'sealed' || resultType === 'resolved'}
                 />
 
-                {/* Kopyalama butonu - sonuç varken göster */}
-                {resultType && (
+                {/* Kopyalama butonu - başarılı sonuç varken göster */}
+                {(resultType === 'sealed' || resultType === 'resolved') && (
                     <button
                         className={getCopyClass()}
                         onClick={handleCopy}
@@ -196,7 +177,7 @@ const SealBar = ({ onSeal, onResolve }: SealBarProps) => {
                 <button
                     className="seal-bar-submit"
                     onClick={handleSubmit}
-                    disabled={!inputValue.trim() || isLoading || resultType !== null}
+                    disabled={!inputValue.trim() || isLoading || resultType === 'sealed' || resultType === 'resolved'}
                 >
                     {isLoading ? (
                         <div className="seal-bar-spinner" />
@@ -207,6 +188,18 @@ const SealBar = ({ onSeal, onResolve }: SealBarProps) => {
                     )}
                 </button>
             </div>
+
+            {/* Hata mesajı */}
+            {errorMessage && (
+                <div className="seal-bar-error">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    {errorMessage}
+                </div>
+            )}
         </div>
     );
 };

@@ -232,6 +232,35 @@
     animation: copyPulse 0.3s ease;
 }
 
+/* Hata durumu stilleri (kırmızı) */
+.seal-bar-input-wrapper.error {
+    border-color: rgba(239, 68, 68, 0.4);
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(220, 38, 38, 0.08) 100%);
+}
+
+.seal-bar-input.error-result {
+    color: rgba(239, 68, 68, 0.95);
+}
+
+/* Hata mesajı */
+.seal-bar-error {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 10px 14px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    color: rgb(239, 68, 68);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+}
+
+.seal-bar-error svg {
+    flex-shrink: 0;
+}
+
 /* Responsive */
 @media (max-width: 480px) {
     .seal-bar-container {
